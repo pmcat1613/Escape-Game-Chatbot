@@ -1,159 +1,71 @@
-# TOC Project 2020
+# 前言
+做了一個簡單的小遊戲，~~應該還算好玩~~
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/dc7fa47fcd809b99d087/maintainability)](https://codeclimate.com/github/NCKU-CCS/TOC-Project-2020/maintainability)
+# 構想
+藉由一些裝飾或畫面等，剛好line bot可傳送照片，訊息提示，或按鈕選擇，所以便開始發想並實現。
 
-[![Known Vulnerabilities](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020/badge.svg)](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020)
+# 使用說明
+輸入任意開始初始狀態，之後就可以根據現在bot傳送的畫面及訊息等，按下想要執行的動作按鈕或根據要求輸入，最後通過遊戲
+### 操作分為下列幾種
+1.bot傳送的畫面及訊息有按鈕 -> 可以直接按下想要執行的按鈕
+2.訊息中有提示可以輸入一些字母 -> 可以輸入字母
+3.在任何狀態輸入"fsm" -> 得到fsm圖，狀態不改變
+4.隨意輸入 -> 通常為沒有效果，狀態不改變
 
+# 架構圖
+## 用來解釋的圖
+![](https://i.imgur.com/seesQhx.png)
+上圖註：
+雙紅線代表具備2種方向（go,return）
+單藍線代表只具備箭頭的方向
 
-Template Code for TOC Project 2020
+左上角的未收錄代表有些線畫在這裡會使畫面混亂
+1. 在end或start狀態時任意輸入，會 -> start
+2. 輸入"fsm" -> 得到fsm圖，狀態不改變
+3. 除\*_ lock、end或start狀態時任意輸入 -> 得到無效訊息，狀態不改變
 
-A Line bot based on a finite state machine
+## State說明
+f/l/r/b四個各自分為2種狀態(檢查：用來做查看各面的物品/非檢查：用來轉向)
 
-More details in the [Slides](https://hackmd.io/@TTW/ToC-2019-Project#) and [FAQ](https://hackmd.io/s/B1Xw7E8kN)
+\*_ lock：鎖盒
+1. 回答正確密碼解開 -> \*_ ans
+2. 回答錯誤密碼 -> \*_ lock
 
-## Setup
+其他state代表可能含有提示 ~~（不一定有）~~
 
-### Prerequisite
-* Python 3.6
-* Pipenv
-* Facebook Page and App
-* HTTPS Server
-
-#### Install Dependency
-```sh
-pip3 install pipenv
-
-pipenv --three
-
-pipenv install
-
-pipenv shell
-```
-
-* pygraphviz (For visualizing Finite State Machine)
-    * [Setup pygraphviz on Ubuntu](http://www.jianshu.com/p/a3da7ecc5303)
-	* [Note: macOS Install error](https://github.com/pygraphviz/pygraphviz/issues/100)
-
-
-#### Secret Data
-You should generate a `.env` file to set Environment Variables refer to our `.env.sample`.
-`LINE_CHANNEL_SECRET` and `LINE_CHANNEL_ACCESS_TOKEN` **MUST** be set to proper values.
-Otherwise, you might not be able to run your code.
-
-#### Run Locally
-You can either setup https server or using `ngrok` as a proxy.
-
-#### a. Ngrok installation
-* [ macOS, Windows, Linux](https://ngrok.com/download)
-
-or you can use Homebrew (MAC)
-```sh
-brew cask install ngrok
-```
-
-**`ngrok` would be used in the following instruction**
-
-```sh
-ngrok http 8000
-```
-
-After that, `ngrok` would generate a https URL.
-
-#### Run the sever
-
-```sh
-python3 app.py
-```
-
-#### b. Servo
-
-Or You can use [servo](http://serveo.net/) to expose local servers to the internet.
+## fsm_py內的function
+into_\*()：從其他state進入該\state時執行
+error()：\*_ lock回答錯誤密碼時執行
+states_not_ch()：非可執行訊息出現時執行
+fsm()：傳送fsm圖
 
 
-## Finite State Machine
-![fsm](./img/show-fsm.png)
+# FSM圖片架構
+![](https://i.imgur.com/CLBa2Qd.png)
 
-## Usage
-The initial state is set to `user`.
 
-Every time `user` state is triggered to `advance` to another state, it will `go_back` to `user` state after the bot replies corresponding message.
+# 使用示範
+## 看向四面範例
+![](https://i.imgur.com/4QTEX79.png)
+## 檢查四面範例
+![](https://i.imgur.com/bdbBPSZ.png)
+## 檢查單一物件範例並返回
+![](https://i.imgur.com/8mgI5Qw.png)
+## 返回
+![](https://i.imgur.com/VsZlBTK.png)
+## 檢查鎖盒範例（正確）
+（為了保留趣味，為了在DEMO時表現正確，程式中所有解謎都有使用"DEMO"作為完全正確字）
+（同樣為了保留趣味，下方截圖只截取一部份）
+![](https://i.imgur.com/dDuYvjv.png)
+## 檢查鎖盒範例（錯誤）
+![](https://i.imgur.com/H8eC7mF.png)
+## 檢查最終鎖盒範例（正確）
+（同樣為了保留趣味，為了在DEMO時表現正確，程式中所有解謎都有使用"DEMO"作為完全正確字）
+![](https://i.imgur.com/LZa1S2S.png)
+## 回到一開始範例
+![](https://i.imgur.com/PtjIcP1.png)
+## 一開始隨意輸入範例
+![](https://i.imgur.com/o62OhXk.png)
+## 其他狀態時隨意輸入範例
+![](https://i.imgur.com/s9QAfTQ.png)
 
-* user
-	* Input: "go to state1"
-		* Reply: "I'm entering state1"
-
-	* Input: "go to state2"
-		* Reply: "I'm entering state2"
-
-## Deploy
-Setting to deploy webhooks on Heroku.
-
-### Heroku CLI installation
-
-* [macOS, Windows](https://devcenter.heroku.com/articles/heroku-cli)
-
-or you can use Homebrew (MAC)
-```sh
-brew tap heroku/brew && brew install heroku
-```
-
-or you can use Snap (Ubuntu 16+)
-```sh
-sudo snap install --classic heroku
-```
-
-### Connect to Heroku
-
-1. Register Heroku: https://signup.heroku.com
-
-2. Create Heroku project from website
-
-3. CLI Login
-
-	`heroku login`
-
-### Upload project to Heroku
-
-1. Add local project to Heroku project
-
-	heroku git:remote -a {HEROKU_APP_NAME}
-
-2. Upload project
-
-	```
-	git add .
-	git commit -m "Add code"
-	git push -f heroku master
-	```
-
-3. Set Environment - Line Messaging API Secret Keys
-
-	```
-	heroku config:set LINE_CHANNEL_SECRET=your_line_channel_secret
-	heroku config:set LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token
-	```
-
-4. Your Project is now running on Heroku!
-
-	url: `{HEROKU_APP_NAME}.herokuapp.com/callback`
-
-	debug command: `heroku logs --tail --app {HEROKU_APP_NAME}`
-
-5. If fail with `pygraphviz` install errors
-
-	run commands below can solve the problems
-	```
-	heroku buildpacks:set heroku/python
-	heroku buildpacks:add --index 1 heroku-community/apt
-	```
-
-	refference: https://hackmd.io/@ccw/B1Xw7E8kN?type=view#Q2-如何在-Heroku-使用-pygraphviz
-
-## Reference
-[Pipenv](https://medium.com/@chihsuan/pipenv-更簡單-更快速的-python-套件管理工具-135a47e504f4) ❤️ [@chihsuan](https://github.com/chihsuan)
-
-[TOC-Project-2019](https://github.com/winonecheng/TOC-Project-2019) ❤️ [@winonecheng](https://github.com/winonecheng)
-
-Flask Architecture ❤️ [@Sirius207](https://github.com/Sirius207)
-
-[Line line-bot-sdk-python](https://github.com/line/line-bot-sdk-python/tree/master/examples/flask-echo)
