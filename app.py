@@ -307,11 +307,11 @@ def webhook_handler():
             machine.states_not_ch(event)
     return "OK"
 
-'''png_name=""
-@app.route(f"/{png_name}", methods=["GET"])
-def show_fsm():
-    machine.get_graph().draw(png_name, prog="dot", format="png")
-    return send_file("fsm.png", mimetype="image/png")'''
+# '''png_name=""
+# @app.route(f"/{png_name}", methods=["GET"])
+# def show_fsm():
+#     machine.get_graph().draw(png_name, prog="dot", format="png")
+#     return send_file("fsm.png", mimetype="image/png")'''
 @app.route('/img/<ImageName>', methods=["GET"])
 def getImage(ImageName):
     return send_file(f'./img/{ImageName}', mimetype='image/png',as_attachment=True)
